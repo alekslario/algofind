@@ -27,6 +27,7 @@ const dijkstraAlgorithm = (
 
   const { col: startCol, row: startRow } = startNodePosition;
   nodes[startRow][startCol].distance = 0;
+  //todo: flatMap? why not flat
   let unvisitedNodes = nodes.flatMap((node) => node);
   let visits = 0;
 

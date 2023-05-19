@@ -1,10 +1,13 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import './App.css';
-import ConfigMenu from './components/ConfigMenu';
+import Mouse from './components/Mouse'
+import Reset from './components/Reset'
+import Run from './components/Run'
+import Menu from './components/Menu';
+
 import {
   Algorithms,
-  DraggableElements,
   INode,
   Tools,
 } from './utils/interfaces';
@@ -21,17 +24,23 @@ import {
   toggleWall,
 } from './redux/nodesSlice';
 import useWindowSize from './hooks/useWindowSize';
+type ClickAction = 'start' | 'finish' | 'wall' | 'weight';
+type StateOptions = {
+  algo: Algorithms;
+  action: ClickAction;
+  locked: boolean;
+}
 
+const algos: Algorithms[] = ['dijkstra', 'astar', 'dfs', 'bfs'];
+const clickActions: ClickAction[] = ['start', 'finish', 'wall', 'weight'];
 const App = () => {
   const nodes = useSelector((state: RootState) => state.nodes.nodes);
   const dispatch = useDispatch();
-
-  const [mouseIsPressed, setMouseIsPressed] = useState(false);
-  const [draggedElement, setDraggedElement] =
-    useState<DraggableElements | null>(null);
-  const [canRun, setCanRun] = useState(true);
-  const [selectedTool, setSelectedTool] = useState<Tools>('Walls');
-  const [currentWeight, setCurrentWeight] = useState(1);
+  const [{ algo, action }, setState] = useState<StateOptions>({
+    algo: 'dijkstra',
+    action: 'finish',
+    locked: false,
+  });
 
   const windowWidth = useWindowSize();
 
@@ -39,62 +48,74 @@ const App = () => {
     dispatch(clearBoard());
   }, [windowWidth, dispatch]);
 
-  const handleDrop = (
-    e: React.DragEvent<HTMLDivElement>,
-    row: number,
-    col: number,
-  ) => {
-    e.preventDefault();
-    if (draggedElement === 'startNode') dispatch(changeStart({ col, row }));
-    else if (draggedElement === 'endNode') dispatch(changeFinish({ col, row }));
-  };
-
-  const handleCallAlgorithm = (algorithm: Algorithms) => {
-    setCanRun(false);
-    dispatch(runAlgorithm(algorithm));
+  const handleCallAlgorithm = () => {
+    setState((prevState) => ({ ...prevState, locked: true }));
+    dispatch(runAlgorithm(algo));
   };
 
   const handleClearBoard = () => {
     dispatch(clearBoard());
-    setCanRun(true);
+    setState((prevState) => ({ ...prevState, locked: false }));
   };
 
   const handleClearPath = () => {
     dispatch(clearPath());
-    setCanRun(true);
+    setState((prevState) => ({ ...prevState, locked: false }));
   };
 
-  const handleMouseDown = (node: INode) => {
-    if (!node.isStart && !node.isFinish) {
-      const { row, col } = node;
-      if (selectedTool === 'Walls') dispatch(toggleWall({ row, col }));
-      else if (selectedTool === 'Eraser') dispatch(resetNode({ row, col }));
-      else if (selectedTool === 'Weight')
-        dispatch(setWeight({ row, col, weight: currentWeight }));
-      setMouseIsPressed(true);
-    }
-  };
+  const handleSwitchAlgorithm = (algo: Algorithms, index: number) => {
+    setState((prevState) => ({ ...prevState, algo }));
+  }
 
-  const handleMouseEnter = (node: INode) => {
-    if (!node.isStart && !node.isFinish && mouseIsPressed) {
-      const { row, col } = node;
-      if (selectedTool === 'Walls') dispatch(toggleWall({ row, col }));
-      else if (selectedTool === 'Eraser') dispatch(resetNode({ row, col }));
+  const handleNodeClick = (col: number, row: number) => {
+
+    switch (action) {
+      case 'start':
+        dispatch(changeStart({ col, row }));
+        break;
+      case 'finish':
+        dispatch(changeFinish({ col, row }));
+        break;
+      case 'wall':
+        dispatch(toggleWall({ col, row }));
+        break;
+      case 'weight':
+        dispatch(setWeight({ col, row }));
+        break;
+      default:
+        break;
     }
   };
 
   return (
     <div className='bg-zinc-800 min-h-screen'>
-      <ConfigMenu
-        callAlgorithm={handleCallAlgorithm}
-        clearBoard={handleClearBoard}
-        clearPath={handleClearPath}
-        canRun={canRun}
-        selectedTool={selectedTool}
-        setSelectedTool={setSelectedTool}
-        weight={currentWeight}
-        setWeight={setCurrentWeight}
-      />
+      <menu>
+        <div className='menu_wrapper'>
+          <ul className="Nav Nav_Small MainNav" style={{ padding: "5px" }}>
+            {algos.map((_algo, index) => (<button className={`MainNav-Button ${_algo === algo ? 'MainNav-Button_LeftOfActive' : ''}`} onClick={() => handleSwitchAlgorithm(_algo, index)} ></button>))}
+          </ul>
+          <ul className='menu_text_wrapper'>
+            {algos.map((_algo) => (<li><p>{_algo}</p></li>))}
+          </ul>
+          <div><Mouse /></div>
+        </div>
+        <hr />
+        <div className='menu_wrapper'>
+          <ul className="Nav Nav_Small MainNav" style={{ padding: "5px" }}>
+            {clickActions.map((_action) => (<button className={`MainNav-Button ${_action === action ? 'MainNav-Button_LeftOfActive' : ''}`}
+              onClick={() => setState((prevState) => ({ ...prevState, action: _action }))}></button>))}
+          </ul>
+          <ul className='menu_text_wrapper'>
+            {clickActions.map((_action) => (<li><p>{_action}</p></li>))}
+          </ul>
+        </div>
+        <hr />
+        <ul className="MainNav_action_buttons">
+          <button className="MainNav-Button MainNav-Button_LeftOfActive" onClick={handleCallAlgorithm}><Run /></button>
+          <button className="MainNav-Button MainNav-Button_Active" onClick={handleClearBoard}><Reset /></button>
+        </ul>
+      </menu >
+
       <div className='w-full'>
         <div className='flex flex-col items-center'>
           {nodes.map((row) => (
@@ -103,11 +124,7 @@ const App = () => {
                 <Node
                   node={node}
                   key={node.col + node.row}
-                  handleDrop={handleDrop}
-                  setDraggedElement={setDraggedElement}
-                  handleMouseDown={handleMouseDown}
-                  handleMouseEnter={handleMouseEnter}
-                  handleMouseUp={() => setMouseIsPressed(false)}
+                  onClick={() => handleNodeClick(node.col, node.row)}
                 />
               ))}
             </div>

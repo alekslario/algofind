@@ -97,10 +97,12 @@ export const nodesSlice = createSlice({
 
     setWeight: (
       state,
-      action: PayloadAction<ColAndRow & Pick<INode, 'weight'>>,
+      action: PayloadAction<ColAndRow>,
     ) => {
-      const { col, row, weight } = action.payload;
-      state.nodes[row][col].weight = weight;
+      const { col, row } = action.payload;
+      const node = state.nodes[row][col];
+      if (node.isFinish || node.isStart || node.isWall) return;
+      state.nodes[row][col].weight += 1;
     },
 
     resetNode: (state, action: PayloadAction<ColAndRow>) => {
