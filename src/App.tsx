@@ -36,7 +36,7 @@ const clickActions: ClickAction[] = ['start', 'finish', 'wall', 'weight'];
 const App = () => {
   const nodes = useSelector((state: RootState) => state.nodes.nodes);
   const dispatch = useDispatch();
-  const [{ algo, action }, setState] = useState<StateOptions>({
+  const [{ algo, action, locked }, setState] = useState<StateOptions>({
     algo: 'dijkstra',
     action: 'finish',
     locked: false,
@@ -49,6 +49,7 @@ const App = () => {
   }, [windowWidth, dispatch]);
 
   const handleCallAlgorithm = () => {
+    if (locked) return;
     setState((prevState) => ({ ...prevState, locked: true }));
     dispatch(runAlgorithm(algo));
   };
@@ -68,7 +69,7 @@ const App = () => {
   }
 
   const handleNodeClick = (col: number, row: number) => {
-
+    if (locked) return;
     switch (action) {
       case 'start':
         dispatch(changeStart({ col, row }));
@@ -120,10 +121,11 @@ const App = () => {
         <div className='flex flex-col items-center'>
           {nodes.map((row) => (
             <div className='flex'>
-              {row.map((node) => (
+              {row.map((node, index) => (
                 <Node
                   node={node}
                   key={node.col + node.row}
+                  order={index}
                   onClick={() => handleNodeClick(node.col, node.row)}
                 />
               ))}

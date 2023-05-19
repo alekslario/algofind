@@ -8,10 +8,12 @@ import styled from "styled-components"
 
 interface INodeComponent {
   node: INode;
+  order: number;
   onClick?: () => void;
 }
 
-const Block = styled.div<{ active: string, state: string; }>`
+const Block = styled.div<{ node: INode, animate: string; }>`
+      transition: all 0.25s ease-in-out;
       border-radius: 0.3125em;
       box-shadow: rgba(255, 255, 255, 0.15) 0 1px 0px 0px inset, rgba(255, 255, 255, 0.05) 0 1px 0px 1px inset, rgba(0, 0, 0, 0.7) 0 1px 2px 0px, rgba(9, 9, 9, 0.6) 0 2px 3px 2px;
       background-color: #343434;
@@ -40,7 +42,8 @@ const Block = styled.div<{ active: string, state: string; }>`
         left: 0;
         top: 0;
       }
-      ${({ active }) => active ?
+      
+      ${({ node, animate }) => node.isStart || node.isFinish || (node.isPath && animate === 'path') || node.isWall || (node.isVisited && animate === 'visited') || node.weight > 0 ?
     `
             	box-shadow: rgba(0, 0, 0, 0.4) 0 0 0 1px inset;
               background-color: #2d2d2d;
@@ -49,7 +52,8 @@ const Block = styled.div<{ active: string, state: string; }>`
               &:hover{
                 box-shadow: rgba(0, 0, 0, 0.4) 0 0 0 1px inset;
               }
-              $::before{
+              &::before{
+                
                 	content: '';
                   display: block;
                   position: absolute;
@@ -64,7 +68,6 @@ const Block = styled.div<{ active: string, state: string; }>`
                 	content: '';
                   display: block;
                   position: absolute;
-                  background-image: -webkit-radial-gradient(center, ellipse cover, rgba(41, 137, 216, 0.51) 0%, rgba(30, 87, 153, 0.01) 53%, rgba(30, 87, 153, 0) 54%, rgba(30, 87, 153, 0) 57%);
                   box-shadow: rgba(255, 255, 255, 0.05) 0 -5px 0px 0px inset;
                   top: inherit;
                   bottom: -0.5em;
@@ -74,91 +77,96 @@ const Block = styled.div<{ active: string, state: string; }>`
               }
             `
     : ''}
-     ${({ state }) => {
-    switch (state) {
-      case 'start':
-        return `
-          &::before, &::after {
+     ${({ node, animate }) => {
+    if (node.isPath && animate === 'path') {
+      return `
+         &::before, &::after {
+           background-image: -webkit-radial-gradient(center, ellipse cover, rgb(255 14 14 / 70%) 0%, rgba(30, 87, 153, 0.01) 53%, rgba(30, 87, 153, 0) 54%, rgba(30, 87, 153, 0) 57%);
+        
+          }`
+    } else if (node.isVisited && animate === 'visited') {
+      return `
+      &::before, &::after {
+          background-image: -webkit-radial-gradient(center, ellipse cover, rgba(41, 137, 216, 0.51) 0%, rgba(30, 87, 153, 0.01) 53%, rgba(30, 87, 153, 0) 54%, rgba(30, 87, 153, 0) 57%);
+      }
+          `
+
+    } else if (node.isStart) {
+      return `
+          &::after, &::before {
             background-image: -webkit-radial-gradient(center, ellipse cover, rgb(179 209 60 / 51%) 0%, rgba(30, 87, 153, 0.01) 53%, rgba(30, 87, 153, 0) 54%, rgba(30, 87, 153, 0) 57%);
           }
-        `
-      case 'end':
-        return `
+        `}
+    else if (node.isFinish) {
+      return `
          &::before, &::after {
           transition:  opacity 1.2s ease-out;
 	        background-image: -webkit-radial-gradient(center, ellipse cover, rgb(213 213 213 / 51%) 0%, rgba(30, 87, 153, 0.01) 53%, rgba(30, 87, 153, 0) 54%, rgba(30, 87, 153, 0) 57%);
          }
-          `
-      case 'wall':
-        return `
+          ` }
+    else if (node.isWall) {
+      return `
          &::before, &::after {
            background-image: none;
          }
-          `
-      case 'path':
-        return `
-         &::before, &::after {
-           background-image: -webkit-radial-gradient(center, ellipse cover, rgb(255 14 14 / 70%) 0%, rgba(30, 87, 153, 0.01) 53%, rgba(30, 87, 153, 0) 54%, rgba(30, 87, 153, 0) 57%);
-         }
-          `
-      default:
-        return '';
-    }
+          
+          ` }
+
   }}
 `;
-const Light = styled.div<{ state: string; }>`
-    transition:  background-color 0.3s, box-shadow 1.2s ease-out;
+const Light = styled.div<{ node: INode, animate: string }>`
+    transition: all 0.25s ease-in-out;
+    font-size: 1.5em;
+	  padding: 0.1em 0.1em 0.1em;
     width: 0.4em;
     height: 0.4em;
     border-radius: 50%;
     background-color: #0c090947;
     box-shadow: #000000 0px 1px 0px 0px inset, rgb(229 220 220 / 14%) 0 -1px 0px 0px inset;
-      ${({ state }) => {
-    switch (state) {
-      case 'start':
-        return `
-         background-color: #7bf708;
-         box-shadow: rgb(255 255 255 / 40%) 0px 0px 5px 2px, rgb(18 247 29 / 14%) 0 0px 9px 11px;
-        `
-      case 'end':
-        return `
-       background-color: #ffdada;
-       box-shadow: rgb(255 255 255 / 40%) 0px 0px 7px 2px, rgb(124 100 100 / 14%) 0 0px 6px 12px;
-          `
-      case 'visited':
-        return `
-           background-color: var(--blueish);
-           box-shadow: rgb(255 255 255 / 40%) 0px 0px 6px 1px, rgb(76 190 255 / 14%) 0 0px 6px 1px;
-          `
-      case 'path':
-        return `
+    ${({ node }) =>
+    node.weight > 0 ?
+      `   width: 15px;
+          height: 15px;
+          font-size: 0.5em;
+          text-align: center;
+          line-height: 16px;`
+      : ''
+  }
+      ${({ node, animate }) => {
+    if (node.isPath && animate === 'path') {
+      return `
          background-color: #ff0505;
          box-shadow: rgb(255 255 255 / 26%) 0px 0px 7px 1px, rgb(255 0 0 / 28%) 0 0px 7px 3px;
           `
-      case 'weight':
-        return `
-          width: 15px;
-          height: 15px;
-          font-size: 0.3em;
-          text-align: center;
-          color: #80808045;
-          line-height: 16px;
-          background-color: #ffdada;
-          text-shadow: #000 0 -1px 0;
+    } else if (node.isVisited && animate === 'visited') {
+      return `
+           background-color: #4cbeff;
+           box-shadow: rgb(255 255 255 / 40%) 0px 0px 6px 1px, rgb(76 190 255 / 14%) 0 0px 6px 1px;
           `
-      default:
-        return '';
-    }
+
+    } else if (node.isStart) {
+      return `
+         background-color: #7bf708;
+         box-shadow: rgb(255 255 255 / 40%) 0px 0px 5px 2px, rgb(18 247 29 / 14%) 0 0px 9px 11px;
+        `}
+    else if (node.isFinish || node.weight > 0) {
+      return `
+       background-color: #ffdada;
+       box-shadow: rgb(255 255 255 / 40%) 0px 0px 7px 2px, rgb(124 100 100 / 14%) 0 0px 6px 12px;
+          ` }
+
+
   }}
 `;
 
 const Node: React.FC<INodeComponent> = ({
-  node, ...props
+  node, order, ...props
 }) => {
+  console.log('repainting');
+
   const dispatch = useDispatch();
   const animationSpeed = 10;
-  const [classes, setClasses] = useState('');
-  const [buttonClasses, setButtonClasses] = useState('');
+  const [animate, setBeginAnimate] = useState('');
 
   useEffect(() => {
     let timeout: number | null = null;
@@ -166,20 +174,18 @@ const Node: React.FC<INodeComponent> = ({
     if (node.isPath) {
 
       timeout = setTimeout(() => {
-        setClasses('block_button_active block_button_active_path');
-        // setButtonClasses('block_button_circle');
-      }, animationSpeed * node.distance);
+        setBeginAnimate('path')
+      }, animationSpeed * (node.distance * 2));
     } else if (node.isVisited) {
       // setting timeout for animation
       timeout = setTimeout(() => {
-        setClasses('block_button_active');
-        // check if animation ended and start animating path
+        setBeginAnimate('visited')
         if (node.isFinish) {
           dispatch(setPath());
         }
-      }, animationSpeed * node.whenVisited);
+      }, animationSpeed * node.whenVisited * 2);
     } else {
-      setClasses('');
+      setBeginAnimate('');
     }
     return () => {
       if (timeout) clearTimeout(timeout);
@@ -197,42 +203,21 @@ const Node: React.FC<INodeComponent> = ({
     dispatch,
   ]);
 
-  const variants = {
-    initial: {
-      width: '0.4em',
-      height: '0.4em',
-    },
-    animate: {
-      width: '15px',
-      height: '15px',
-      transition: {
-        type: "spring", duration: 0.5,
-      }
-    }
-  };
-
   return (
     <div className='block_wrapper'>
-      <div
+      <Block
         id={`${node.row}-${node.col}`}
         aria-label={`${node.row}-${node.col}`}
-        className={`block_button ${node.isStart || node.isFinish || node.isWall || node.weight > 0 ? "block_button_active" : ''} ${node.isWall ? 'block_button_active_wall' : ''} ${node.isStart ? 'block_button_active_start' : ''} ${node.isFinish ? 'block_button_active_end' : ''} ${classes}`}
+        node={node}
+        animate={animate}
         role='gridcell'
         tabIndex={0}
         {...props}
       >
-
-        <span>
-          <motion.div variants={variants} animate={node.weight > 0 ? "animate" : "initial"}
-            initial="initial" className={`block_button_circle ${node.isStart ? "block_button_circle_start" : ''
-              }
-          ${node.isFinish ? "block_button_circle_end" : ''}
-          ${node.isPath ? "block_button_circle_path" : ''} ${node.isWall ? "block_button_circle_wall" : ''} ${node.weight > 0 ? "block_button_circle_has_weight" : ''}
-          ${node.isVisited ? "block_button_circle_visited" : ''}
-          ${buttonClasses}
-        `}>{node.weight > 0 ? node.weight : null}</motion.div>
-        </span>
-      </div>
+        <Light node={node}
+          animate={animate}
+        >{node.weight > 0 ? node.weight : null}</Light>
+      </Block>
     </div>
   );
 };
