@@ -219,7 +219,7 @@ menu {
    width: 200px;
    height: fit-content;
    padding: 20px !important;
-   background-image: linear-gradient(198deg, #423939d1, #181616eb), url(https://cdn.discordapp.com/attachments/1106588564113854465/1108781083018932265/alekslario_None_12cdfe9b-9d17-4df6-a56d-70a4cafd9807.png);
+   background-image: linear-gradient(198deg, #423939d1, #181616eb), url('./menu.png');
    z-index: 100;
    top:20px;
    right:0;
