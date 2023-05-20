@@ -1,19 +1,9 @@
-input[type='number']::-webkit-inner-spin-button,
-input[type='number']::-webkit-outer-spin-button {
-	-webkit-appearance: none;
-	margin: 0;
-}
-
-.custom-number-input input:focus {
-	outline: none !important;
-}
-
-.custom-number-input button:focus {
-	outline: none !important;
-}
 
 :root{
 	--blueish: #4cbeff;
+}
+body {
+	overflow-x: hidden;
 }
 
 .MainNav {
@@ -225,34 +215,36 @@ input[type='number']::-webkit-outer-spin-button {
 menu {
    display: flex;
    flex-direction: column;
-
    position: fixed;
    width: 200px;
    height: fit-content;
-   background-image: linear-gradient(198deg, #443434ad, #242323db), url(https://cdn.discordapp.com/attachments/1106588564113854465/1108781083018932265/alekslario_None_12cdfe9b-9d17-4df6-a56d-70a4cafd9807.png);
+   padding: 20px !important;
+   background-image: linear-gradient(198deg, #423939d1, #181616eb), url(https://cdn.discordapp.com/attachments/1106588564113854465/1108781083018932265/alekslario_None_12cdfe9b-9d17-4df6-a56d-70a4cafd9807.png);
    z-index: 100;
    top:20px;
    right:0;
-    border-radius: 5% 0 0 5%;
-	box-shadow: #dfcaca24 0px 1px 0px 0px inset, #1a1919d9 0px -1px 0px 0px inset;
+   border-radius: 5% 0 0 5%;
+   box-shadow: #dfcaca24 0px 1px 0px 0px inset, #1a1919d9 0px -1px 0px 0px inset;
 }
 .menu_wrapper{
 	display: flex;
 	flex-direction: row;
-
 }
 
 p {
-	    text-shadow: rgba(255, 255, 255, 0.4) 0 0 35px, rgba(76, 190, 255, 0.95) 0 0 25px;
-	/* color:#a6a6a6; */
-	color:var(--blueish);
+	color:#a6a6a6;
 	font-size: 0.75em;
 	line-height:emCalc(18,13);
 	margin-top:2em;
- margin-bottom: 1em;
- text-transform: uppercase;
-     font-weight: normal;
+    margin-bottom: 1em;
+    text-transform: uppercase;
+    font-weight: normal;
     letter-spacing: 2px;
+}
+
+.highlighted_text {
+	color:var(--blueish);
+	text-shadow: rgba(255, 255, 255, 0.4) 0 0 35px, rgba(76, 190, 255, 0.95) 0 0 25px;
 }
 .menu_text_wrapper li{
   height:35px;
@@ -260,9 +252,22 @@ p {
 .menu_text_wrapper {
 	margin: 14px 0 0 10px;
 }
+.menu_button_center {
+	transition:all 0.2s ease-in-out;
+	border-radius: 15%;
+	width: 100%;
+    height: 100%;
+	border:none;
+	background: inherit;
+}
+.menu_button_center_highlighter{
+    background: #b3b3d333;
+    border: 3px solid #4cbeff;
+    box-shadow: rgb(255 255 255 / 40%) 0px 0px 6px 1px, rgb(76 190 255 / 14%) 0 0px 6px 1px;
+}
 
 hr {
-	margin-top: 15px;
+	margin: 25px 0 !important;
     display: block;
     unicode-bidi: isolate;
 	margin-inline-start: auto;
@@ -278,8 +283,15 @@ hr {
 
 .MainNav_action_buttons {
 	flex-direction: row;
-	width: 100%;
+	width: fit-content;
+	padding: 5px;
 }
+
+.MainNav_action_buttons button {
+	margin-right: 4px;
+
+}
+
 
 .MainNav_action_buttons li {
 	width:auto;
@@ -291,12 +303,39 @@ hr {
 	font-size: 13px;
 	
 }
+.svg_part {
+fill:#4cbeff61;
+/* stroke:var(--blueish); */
+}
+.svg_part_stroke {
+stroke:#4cbeff61;
+}
+.MainNav-Button_Active .svg_part {
+	fill:var(--blueish);
+}
+
+.MainNav-Button_Active .svg_part_stroke {
+	stroke:var(--blueish);
+}
+
  .MainNav_action_buttons .svg_reset {
-	height: 22px;
+	height: 23px;
 }
 
 .MainNav_action_buttons .svg_run {
-	height: 15px;
+	height: 12px;
 } 
+
+.MainNav_action_buttons .svg_dice {
+	height: 13px;
+} 
+
+.MainNav_action_buttons .svg_smile {
+	height: 30px;
+} 
+
+.MainNav_action_buttons .MainNav-Button_Active svg {
+filter: drop-shadow(0px 3px 3px var(--blueish));
+}
 
 

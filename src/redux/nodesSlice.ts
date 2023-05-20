@@ -10,9 +10,9 @@ import bfsAlgorithm from '../algorithms/bfs';
 import dfsAlgorithm from '../algorithms/dfs';
 import astarAlgorithm from '../algorithms/astar';
 
-const START_ROW = 20;
-const FINISH_ROW = 20;
-const TOTAL_ROWS = 45;
+const START_ROW = 10;
+const FINISH_ROW = 10;
+const TOTAL_ROWS = 25;
 
 const generateNode = (
   col: number,
